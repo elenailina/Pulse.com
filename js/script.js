@@ -40,7 +40,13 @@ $(document).ready(function() {
         $('.overlay, #consultation').fadeIn('slow');
     });
     $('.modal__close').on('click', function(){
-        $('.overlay, #consultation, #thanks,#order').fadeOut('slow');
+        document.querySelectorAll('label.error').forEach((item) => {
+            item.style.display = "none";
+          });
+          document.querySelectorAll('form input').forEach((item) => {
+            item.classList.remove('error');
+          })
+        $('.overlay, #consultation, #thanks, #order, #error').fadeOut('slow');
     });
     $('.button_mini').on('click', function(){
         $('.overlay, #order').fadeIn('slow');
@@ -80,32 +86,28 @@ $(document).ready(function() {
 
     $('form').submit(function(e) {
         e.preventDefault();
-        $.ajax({
+        var request = $.ajax({
             type: "POST",
             url: "mailer/smart.php",
             data: $(this).serialize()
-        }).done(function(){
-            $(this).find("input").val("");
+        });
+        request.done(function(){
             $('#consultation, #order').fadeOut();
-            $('.overlay, #thanks').fadeIn ();
+            $('.overlay, #thanks').fadeIn();
+            setTimeout(function () {
+                $('.overlay , #thanks').fadeOut();
+                }, 3000);
+            $('form').trigger('reset');
+        }),
+        request.fail(function failForm() {
+            $('#consultation, #order').fadeOut();
+            $('.overlay, #error').fadeIn();
+            setTimeout(function () {
+                $('.overlay , #thanks').fadeOut();
+              }, 3000);
             $('form').trigger('reset');
         });
+            
         return false;
     });
-
-    $(window).scroll(function(){
-        if($(this).scrollTop() > 1600) {
-            $('.pageup').fadeIn();
-        }else {
-            $('.pageup').fadeOut();
-        }
-    });
-
-    $("a[href=#up]").click(function(){
-        const _href = $(this).attr("href");
-        $("html, body").animate({scrollTop: $(_href).offset().top+"px"});
-        return false;
-    });
-
-    new WOW().init();
 });
